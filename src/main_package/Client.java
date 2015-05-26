@@ -50,6 +50,7 @@ public class Client {
 
 	private static DfsMaster getMaster(String masterIp) throws RemoteException,
 			NotBoundException {
+		System.out.println("Getting Master with ip " + masterIp);
 		System.setProperty("java.rmi.server.hostname", masterIp);
 
 		Registry registry = LocateRegistry.getRegistry(masterIp,

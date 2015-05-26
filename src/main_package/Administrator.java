@@ -41,7 +41,8 @@ public class Administrator {
 		ssh.doCommand(USER_NAME, masterIp, port, "Mohamed1992", command);
 
 		// Start Replica Servers
-		command = "cd " + args[0] + " && javac main_package/RMIReplicaServer.java"
+		command = "cd " + args[0]
+				+ " && javac main_package/RMIReplicaServer.java"
 				+ " && java main_package.RMIReplicaServer";
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -49,10 +50,8 @@ public class Administrator {
 		String line;
 		while ((line = br.readLine()) != null) {
 			temp = line.split(" ");
-
-			if (!temp[0].equals(masterIp))
-				ssh.doCommand(USER_NAME, temp[0], Integer.parseInt(temp[1]),
-						temp[2], command);
+			ssh.doCommand(USER_NAME, temp[0], Integer.parseInt(temp[1]),
+					temp[2], command);
 		}
 		br.close();
 	}
