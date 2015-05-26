@@ -67,8 +67,7 @@ public class Client {
 
 	private static void writDataToRemoteFile(String filePath, Scanner in)
 			throws NotBoundException, FileNotFoundException, IOException {
-		// TODO(houssainy)
-		String[] temp = dfsMaster.read(filePath).split(",");
+		String[] temp = dfsMaster.newTxn(filePath).split(",");
 		String replicaIp = temp[0];
 		long txnID = Long.parseLong(temp[1]);
 
@@ -80,6 +79,7 @@ public class Client {
 		ReplicaServer replicaServer = (ReplicaServer) registry
 				.lookup(Constants.RMI_NAME);
 
+		// TODO(houssainy) add commit and abort requests
 		int msgSeqNum = 0;
 		int ack;
 		String line;
@@ -87,13 +87,13 @@ public class Client {
 			ack = replicaServer.write(txnID, msgSeqNum++, line);
 			System.out.println("Acknowlgdment Received " + ack);
 		}
-
 	}
 
 	private static void readRemoteFile(String filePath)
 			throws NotBoundException, FileNotFoundException, IOException {
 		String replicaIp = dfsMaster.read(filePath);
-
+		System.out.println("Primary Replica ip " + replicaIp);
+		
 		System.setProperty("java.rmi.server.hostname", replicaIp);
 
 		Registry registry = LocateRegistry.getRegistry(replicaIp,
