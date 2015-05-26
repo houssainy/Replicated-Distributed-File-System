@@ -78,12 +78,8 @@ public class DfsMaster implements MasterServerInterface, MasterToPrimaryInterfac
 		String fileName = transactions.get(txnID);
 		transactions.remove(txnID);
 		
-		if (tempFiles.containsKey(fileName)) {
+		if (tempFiles.containsKey(fileName))
 			tempFiles.remove(fileName);
-			log.write("Transaction aborted. Temp file " + fileName);
-		}
-		else
-			log.write("Transaction aborted.");
 	}
 
 	@Override
@@ -94,7 +90,6 @@ public class DfsMaster implements MasterServerInterface, MasterToPrimaryInterfac
 		if (tempFiles.containsKey(fileName)) {
 			metaDataHash.put(fileName, tempFiles.get(fileName));
 			tempFiles.remove(fileName);
-			log.write("Transaction commited. New file " + fileName + " saved.");
 		}
 	}
 }
