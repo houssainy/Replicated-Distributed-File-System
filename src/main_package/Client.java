@@ -9,12 +9,14 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Scanner;
 
+import rmi_interface_package.MasterServerInterface;
+
 public class Client {
 	private final static int READ = 1;
 	private final static int WRITE = 2;
 	private final static int CLOSE = 3;
 
-	private static DfsMaster dfsMaster;
+	private static MasterServerInterface dfsMaster;
 
 	public static void main(String[] args) throws NotBoundException,
 			IOException {
@@ -49,7 +51,7 @@ public class Client {
 		in.close();
 	}
 
-	private static DfsMaster getMaster(String masterIp) throws RemoteException,
+	private static MasterServerInterface getMaster(String masterIp) throws RemoteException,
 			NotBoundException {
 		System.out.println("Getting Master with ip " + masterIp);
 		System.setProperty("java.rmi.server.hostname", masterIp);
@@ -57,7 +59,7 @@ public class Client {
 		Registry registry = LocateRegistry.getRegistry(masterIp,
 				Constants.RMI_REGISTRY_PORT);
 		System.out.println("Server Registered");
-		return (DfsMaster) registry.lookup(Constants.RMI_NAME);
+		return (MasterServerInterface) registry.lookup(Constants.RMI_NAME);
 	}
 
 	private static void writDataToRemoteFile(String filePath, Scanner in)
