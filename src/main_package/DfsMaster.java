@@ -78,7 +78,7 @@ public class DfsMaster extends UnicastRemoteObject implements MasterServerInterf
 			return (id++) + "," + metaDataHash.get(fileName);
 		} else {
 			Random rand = new Random();
-			String primReplica = ips[rand.nextInt(ips.length - 1)];
+			String primReplica = ips[Math.abs(rand.nextInt(ips.length - 1))];
 			tempFiles.put(fileName, primReplica);
 			transactions.put(id, fileName);
 			log.write("File not found. Creating new file. Created new Transaction with id: "
