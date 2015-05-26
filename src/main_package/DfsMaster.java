@@ -7,15 +7,21 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
 import rmi_interface_package.MasterServerInterface;
 
-public class DfsMaster implements MasterServerInterface,
+public class DfsMaster extends UnicastRemoteObject implements MasterServerInterface,
 		PrimaryToMasterInterface {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private BufferedReader metaData;
 	private HashMap<String, String> tempFiles;
 	private HashMap<String, String> metaDataHash;
@@ -25,6 +31,8 @@ public class DfsMaster implements MasterServerInterface,
 	private Log log;
 
 	public DfsMaster() throws IOException {
+		super();
+		
 		metaData = new BufferedReader(new FileReader("conf/MetaData"));
 		tempFiles = new HashMap<>();
 		metaDataHash = new HashMap<>();
@@ -102,37 +110,20 @@ public class DfsMaster implements MasterServerInterface,
 			log.write("Transaction commited. New file " + fileName + " saved.");
 		}
 	}
-
-	public static void main(String[] args) {
-		Scanner fileReader = null;
-		try {
-			fileReader = new Scanner(new File("conf/master_ip"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
+	public static void main(String[] args) throws IOException {
+		Scanner fileReader = new Scanner(new File("conf/master_ip"));
 		String masterIp = fileReader.next();
 		fileReader.close();
 
 		System.out.println("Master Ip = " + masterIp);
-
+		
 		// RMI conf
 		System.setProperty("java.rmi.server.hostname", masterIp);
-		DfsMaster masterServr = null;
-		try {
-			masterServr = new DfsMaster();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		try {
-			LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
-					Constants.RMI_NAME, masterServr);
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		DfsMaster masterServr = new DfsMaster();
+		LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
+				Constants.RMI_NAME, masterServr);
+		
 		System.out.println("DfsMaster Registred to Registry Server...");
 	}
 

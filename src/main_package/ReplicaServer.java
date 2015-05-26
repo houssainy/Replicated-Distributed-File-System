@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.rmi.AccessException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -20,10 +21,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import rmi_interface_package.MessageNotFoundException;
 import rmi_interface_package.ReplicaServerInterface;
 
-public class ReplicaServer implements ReplicaServerInterface,
-		MasterToPrimaryInterface, ReplicaToReplicaInterface {
+public class ReplicaServer extends UnicastRemoteObject implements
+		ReplicaServerInterface, MasterToPrimaryInterface,
+		ReplicaToReplicaInterface {
 
 	// private ArrayList<String> listOfReplicas; // TODO
+
+	private static final long serialVersionUID = 1L;
 
 	private String dfsDir = "";
 	private HashMap<Long, String> transactionMap = new HashMap<Long, String>(); // Key:TxnID,
@@ -67,6 +71,10 @@ public class ReplicaServer implements ReplicaServerInterface,
 			.writeLock();
 	private final Lock fileUsed_writeLock = fileUsedLocker.writeLock();
 	private final Lock fileLock_writeLock = fileLockLocker.writeLock();
+
+	protected ReplicaServer() throws RemoteException {
+		super();
+	}
 
 	@Override
 	public void newTransaction(long txnID, String fileName) {
