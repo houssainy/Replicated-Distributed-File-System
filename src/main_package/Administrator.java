@@ -35,17 +35,17 @@ public class Administrator {
 
 		// Start Master Server
 		String command = "cd " + args[0]
-				+ " && javac main_package/DFSMaster.java"
-				+ " && java main_package.DFSMaster";
+				+ " && javac main_package/RMIMasterServer.java"
+				+ " && java main_package.RMIMasterServer " + dir;
 		Jssh ssh = new Jssh();
 		ssh.doCommand(USER_NAME, masterIp, port, "mohamed1992", command);
 
 		// Start Replica Servers
-		command = "cd " + args[0] + " && javac main_package/ReplicaServer.java"
-				+ " && java main_package.ReplicaServer";
+		command = "cd " + args[0] + " && javac main_package/RMIReplicaServer.java"
+				+ " && java main_package.RMIReplicaServer";
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(
-				new FileInputStream(new File("conf/replica_servers"))));
+				new FileInputStream(new File("conf/replica_servers_ssh"))));
 		String line;
 		while ((line = br.readLine()) != null) {
 			temp = line.split(" ");
@@ -54,5 +54,6 @@ public class Administrator {
 				ssh.doCommand(USER_NAME, temp[0], Integer.parseInt(temp[1]),
 						temp[2], command);
 		}
+		br.close();
 	}
 }

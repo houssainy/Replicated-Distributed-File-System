@@ -1,0 +1,8 @@
+README FILE
+-----------------------
+* conf/replica_server structure:
+
+	<replica server ip> <ssh port number> <ssh password>
+	
+	e.g.
+	192.168.1.22  22 mypassword

@@ -1,5 +1,12 @@
 package main_package;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Scanner;
 
 public class Client {
@@ -7,17 +14,29 @@ public class Client {
 	private final static int WRITE = 2;
 	private final static int CLOSE = 3;
 
-	public static void main(String[] args) {
+	private static DfsMaster dfsMaster;
+
+	public static void main(String[] args) throws NotBoundException,
+			IOException {
+		Scanner fileReader = new Scanner(new File("conf/master_ip"));
+		String masterIp = fileReader.next();
+		fileReader.close();
+
 		Scanner in = new Scanner(System.in);
+		String filePath;
+
+		dfsMaster = getMaster(masterIp);
 
 		boolean running = true;
 		do {
 			switch (in.nextInt()) {
 			case READ:
-				readRemoteFile();
+				filePath = in.nextLine();
+				readRemoteFile(filePath);
 				break;
 			case WRITE:
-				writDataToRemoteFile();
+				filePath = in.nextLine();
+				writDataToRemoteFile(filePath, in);
 				break;
 			case CLOSE:
 				running = false;
@@ -29,13 +48,40 @@ public class Client {
 		in.close();
 	}
 
-	private static void writDataToRemoteFile() {
-		// TODO Auto-generated method stub
+	private static DfsMaster getMaster(String masterIp) throws RemoteException,
+			NotBoundException {
+		System.setProperty("java.rmi.server.hostname", masterIp);
 
+		Registry registry = LocateRegistry.getRegistry(masterIp,
+				Constants.RMI_REGISTRY_PORT);
+		return (DfsMaster) registry.lookup(Constants.RMI_NAME);
 	}
 
-	private static void readRemoteFile() {
-		// TODO Auto-generated method stub
+	private static void writDataToRemoteFile(String filePath, Scanner in)
+			throws NotBoundException, FileNotFoundException, IOException {
+		// TODO(houssainy)
+		String replicaIp = dfsMaster.read(filePath);
 
+		System.setProperty("java.rmi.server.hostname", replicaIp);
+
+		Registry registry = LocateRegistry.getRegistry(replicaIp,
+				Constants.RMI_REGISTRY_PORT);
+
+		ReplicaServer replicaServer = (ReplicaServer) registry
+				.lookup(Constants.RMI_NAME);
+	}
+
+	private static void readRemoteFile(String filePath)
+			throws NotBoundException, FileNotFoundException, IOException {
+		String replicaIp = dfsMaster.read(filePath);
+
+		System.setProperty("java.rmi.server.hostname", replicaIp);
+
+		Registry registry = LocateRegistry.getRegistry(replicaIp,
+				Constants.RMI_REGISTRY_PORT);
+		ReplicaServer replicaServer = (ReplicaServer) registry
+				.lookup(Constants.RMI_NAME);
+
+		System.out.println(replicaServer.read(filePath));
 	}
 }
