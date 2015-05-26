@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 import rmi_interface_package.MasterServerInterface;
-import utilities_package.Log;
 
 public class DfsMaster implements MasterServerInterface,
 		PrimaryToMasterInterface {

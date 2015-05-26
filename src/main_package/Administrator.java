@@ -38,7 +38,7 @@ public class Administrator {
 				+ " && javac main_package/RMIMasterServer.java"
 				+ " && java main_package.RMIMasterServer " + dir;
 		Jssh ssh = new Jssh();
-		ssh.doCommand(USER_NAME, masterIp, port, "mohamed1992", command);
+		ssh.doCommand(USER_NAME, masterIp, port, "Mohamed1992", command);
 
 		// Start Replica Servers
 		command = "cd " + args[0] + " && javac main_package/RMIReplicaServer.java"

@@ -1,4 +1,4 @@
-package utilities_package;
+package main_package;
 
 public class Constants {
 	public final static int RMI_REGISTRY_PORT = 9642;
