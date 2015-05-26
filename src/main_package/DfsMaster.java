@@ -102,20 +102,37 @@ public class DfsMaster implements MasterServerInterface,
 			log.write("Transaction commited. New file " + fileName + " saved.");
 		}
 	}
-	
-	public static void main(String[] args) throws IOException {
-		Scanner fileReader = new Scanner(new File("conf/master_ip"));
+
+	public static void main(String[] args) {
+		Scanner fileReader = null;
+		try {
+			fileReader = new Scanner(new File("conf/master_ip"));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		String masterIp = fileReader.next();
 		fileReader.close();
 
 		System.out.println("Master Ip = " + masterIp);
+
+		// RMI conf
 		System.setProperty("java.rmi.server.hostname", masterIp);
+		DfsMaster masterServr = null;
+		try {
+			masterServr = new DfsMaster();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		DfsMaster masterServr = new DfsMaster();
-
-		LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
-				Constants.RMI_NAME, masterServr);
-		
+		try {
+			LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
+					Constants.RMI_NAME, masterServr);
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println("DfsMaster Registred to Registry Server...");
 	}
 
