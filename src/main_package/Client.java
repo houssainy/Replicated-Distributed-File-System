@@ -32,12 +32,15 @@ public class Client {
 		System.out.println("Master Object initiated...");
 		boolean running = true;
 		do {
+			System.out.println("Enter your command:\n 1- Read.\n 2- Write.\n 3- Close.");
 			switch (in.nextInt()) {
 			case READ:
+				System.out.println("Enter File Path:");
 				filePath = in.nextLine();
 				readRemoteFile(filePath);
 				break;
 			case WRITE:
+				System.out.println("Enter File Path:");
 				filePath = in.nextLine();
 				writDataToRemoteFile(filePath, in);
 				break;
