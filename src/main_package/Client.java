@@ -10,6 +10,7 @@ import java.rmi.registry.Registry;
 import java.util.Scanner;
 
 import rmi_interface_package.MasterServerInterface;
+import rmi_interface_package.MessageNotFoundException;
 
 public class Client {
 	private final static int READ = 1;
@@ -42,7 +43,11 @@ public class Client {
 			case WRITE:
 				System.out.println("Enter File Path:");
 				filePath = in.next();
-				writDataToRemoteFile(filePath, in);
+				try {
+					writDataToRemoteFile(filePath, in);
+				} catch (MessageNotFoundException e) {
+					e.printStackTrace();
+				}
 				break;
 			case CLOSE:
 				running = false;
@@ -66,7 +71,7 @@ public class Client {
 	}
 
 	private static void writDataToRemoteFile(String filePath, Scanner in)
-			throws NotBoundException, FileNotFoundException, IOException {
+			throws NotBoundException, FileNotFoundException, IOException, MessageNotFoundException {
 		String[] temp = dfsMaster.newTxn(filePath).split(",");
 		String replicaIp = temp[0];
 		long txnID = Long.parseLong(temp[1]);
@@ -87,6 +92,7 @@ public class Client {
 			ack = replicaServer.write(txnID, msgSeqNum++, line);
 			System.out.println("Acknowlgdment Received " + ack);
 		}
+		replicaServer.commit(txnID, msgSeqNum);
 	}
 
 	private static void readRemoteFile(String filePath)
