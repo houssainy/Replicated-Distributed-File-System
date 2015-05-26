@@ -26,7 +26,7 @@ public class Log {
 	}
 
 	public void write(String data) {
-		pw.write(data);
+		pw.write(data + "\n");
 	}
 
 	public void close() {
