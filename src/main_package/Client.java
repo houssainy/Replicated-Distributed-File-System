@@ -36,12 +36,12 @@ public class Client {
 			switch (in.nextInt()) {
 			case READ:
 				System.out.println("Enter File Path:");
-				filePath = in.nextLine();
+				filePath = in.next();
 				readRemoteFile(filePath);
 				break;
 			case WRITE:
 				System.out.println("Enter File Path:");
-				filePath = in.nextLine();
+				filePath = in.next();
 				writDataToRemoteFile(filePath, in);
 				break;
 			case CLOSE:
