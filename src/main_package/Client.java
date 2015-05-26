@@ -55,6 +55,7 @@ public class Client {
 
 		Registry registry = LocateRegistry.getRegistry(masterIp,
 				Constants.RMI_REGISTRY_PORT);
+		System.out.println("Server Registered");
 		return (DfsMaster) registry.lookup(Constants.RMI_NAME);
 	}
 
