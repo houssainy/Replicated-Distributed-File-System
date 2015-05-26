@@ -3,6 +3,8 @@ package main_package;
 import java.io.IOException;
 import java.rmi.registry.LocateRegistry;
 
+import utilities_package.Constants;
+
 public class RMIMasterServer {
 	public static void main(String[] args) throws IOException {
 		System.setProperty("java.rmi.server.hostname", "localhost");

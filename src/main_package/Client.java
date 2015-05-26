@@ -9,6 +9,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Scanner;
 
+import utilities_package.Constants;
+
 public class Client {
 	private final static int READ = 1;
 	private final static int WRITE = 2;

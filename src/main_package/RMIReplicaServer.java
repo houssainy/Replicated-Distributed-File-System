@@ -4,6 +4,8 @@ import java.rmi.AccessException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 
+import utilities_package.Constants;
+
 public class RMIReplicaServer {
 	public static void main(String[] args) throws AccessException,
 			RemoteException {
