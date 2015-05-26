@@ -34,6 +34,7 @@ public class DfsMaster implements MasterServerInterface,
 			metaDataHash.put(splittedLine[0], splittedLine[1]);
 		}
 
+		System.out.println("Reading Replica Servers ips.");
 		BufferedReader br = new BufferedReader(new FileReader(
 				"conf/replicaServers"));
 		int noOfIps = Integer.parseInt(br.readLine());
@@ -41,7 +42,7 @@ public class DfsMaster implements MasterServerInterface,
 		for (int i = 0; i < noOfIps; i++)
 			ips[i] = br.readLine();
 		br.close();
-
+		System.out.println("Master Machine Started and Working.");
 		log.write("Master Machine Started and Working.");
 	}
 
