@@ -22,7 +22,7 @@ public class DfsMaster implements MasterServerInterface,
 	private Log log;
 
 	public DfsMaster() throws IOException {
-		metaData = new BufferedReader(new FileReader("config/MetaData"));
+		metaData = new BufferedReader(new FileReader("conf/MetaData"));
 		tempFiles = new HashMap<>();
 		metaDataHash = new HashMap<>();
 		transactions = new HashMap<>();
