@@ -26,7 +26,8 @@ public class Client {
 		String filePath;
 
 		dfsMaster = getMaster(masterIp);
-
+		System.out.println("------------");
+		System.out.println("Master Object initiated...");
 		boolean running = true;
 		do {
 			switch (in.nextInt()) {
