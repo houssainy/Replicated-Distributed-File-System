@@ -1,12 +1,15 @@
 package main_package;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Scanner;
 
 import rmi_interface_package.MasterServerInterface;
 
@@ -99,4 +102,21 @@ public class DfsMaster implements MasterServerInterface,
 			log.write("Transaction commited. New file " + fileName + " saved.");
 		}
 	}
+	
+	public static void main(String[] args) throws IOException {
+		Scanner fileReader = new Scanner(new File("conf/master_ip"));
+		String masterIp = fileReader.next();
+		fileReader.close();
+
+		System.out.println("Master Ip = " + masterIp);
+		System.setProperty("java.rmi.server.hostname", masterIp);
+
+		DfsMaster masterServr = new DfsMaster();
+
+		LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
+				Constants.RMI_NAME, masterServr);
+		
+		System.out.println("DfsMaster Registred to Registry Server...");
+	}
+
 }

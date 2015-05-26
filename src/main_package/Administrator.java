@@ -35,15 +35,15 @@ public class Administrator {
 
 		// Start Master Server
 		String command = "cd " + args[0]
-				+ " && javac main_package/RMIMasterServer.java"
-				+ " && java main_package.RMIMasterServer " + dir;
+				+ " && javac main_package/DfsMaster.java"
+				+ " && java main_package.DfsMaster";
 		Jssh ssh = new Jssh();
 		ssh.doCommand(USER_NAME, masterIp, port, "Mohamed1992", command);
 
 		// Start Replica Servers
 		command = "cd " + args[0]
-				+ " && javac main_package/RMIReplicaServer.java"
-				+ " && java main_package.RMIReplicaServer";
+				+ " && javac main_package/ReplicaServer.java"
+				+ " && java main_package.ReplicaServer " + dir;
 
 		BufferedReader br = new BufferedReader(new InputStreamReader(
 				new FileInputStream(new File("conf/replica_servers_ssh"))));
