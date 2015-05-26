@@ -35,7 +35,7 @@ public class DfsMaster implements MasterServerInterface,
 		}
 
 		BufferedReader br = new BufferedReader(new FileReader(
-				"config/replicaServers"));
+				"conf/replicaServers"));
 		int noOfIps = Integer.parseInt(br.readLine());
 		for (int i = 0; i < noOfIps; i++)
 			ips[i] = br.readLine();
