@@ -80,13 +80,17 @@ public class Client {
 		System.out.println("Replica ip "+ replicaIp);
 		
 		System.setProperty("java.rmi.server.hostname", replicaIp);
-
+		
+		System.out.println("Registering...");
 		Registry registry = LocateRegistry.getRegistry(replicaIp,
 				Constants.RMI_REGISTRY_PORT);
-
+		System.out.println("Registered.");
+		
 		ReplicaServerInterface replicaServer = (ReplicaServerInterface) registry
 				.lookup(Constants.RMI_NAME);
-
+		
+		System.out.println("ReplicaServer Object initiated");
+		
 		// TODO(houssainy) add commit and abort requests
 		int msgSeqNum = 0;
 		int ack;
