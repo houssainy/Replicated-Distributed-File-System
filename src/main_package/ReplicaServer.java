@@ -150,7 +150,9 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		fileUsed_readLock.unlock();
 
 		mapFileToOwnerTransaction_readLock.lock();
-		boolean y = mapFileToOwnerTransaction.get(fileName) != txnID;
+		boolean y = false;
+		if(mapFileToOwnerTransaction.containsKey(fileName))
+			y = mapFileToOwnerTransaction.get(fileName) != txnID;
 		mapFileToOwnerTransaction_readLock.unlock();
 
 		if (!x || y) {
