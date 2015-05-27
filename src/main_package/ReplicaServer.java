@@ -79,6 +79,8 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	protected ReplicaServer(String currentIp) throws RemoteException {
 		super();
 		try {
+			System.out.println("Replica Server Constructed.");
+			
 			initiateMasterServerObject();
 			masterServer.initiateReplicaServerObject(currentIp);
 		} catch (FileNotFoundException | NotBoundException e) {
@@ -278,6 +280,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 			return;
 		}
 		String currentReplicaIp = args[0];
+		System.out.println("Register RMI Registry on ip " + currentReplicaIp);
 		System.setProperty("java.rmi.server.hostname", currentReplicaIp);
 
 		// TODO(houssiany) use hdfs dir
