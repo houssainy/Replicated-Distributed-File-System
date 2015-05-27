@@ -14,14 +14,14 @@ import java.util.Scanner;
 
 import rmi_interface_package.MasterServerInterface;
 
-public class DfsMaster extends UnicastRemoteObject implements MasterServerInterface,
-		PrimaryToMasterInterface {
+public class DfsMaster extends UnicastRemoteObject implements
+		MasterServerInterface, PrimaryToMasterInterface {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	private BufferedReader metaData;
 	private HashMap<String, String> tempFiles;
 	private HashMap<String, String> metaDataHash;
@@ -32,7 +32,7 @@ public class DfsMaster extends UnicastRemoteObject implements MasterServerInterf
 
 	public DfsMaster() throws IOException {
 		super();
-		
+
 		metaData = new BufferedReader(new FileReader("conf/MetaData"));
 		tempFiles = new HashMap<>();
 		metaDataHash = new HashMap<>();
@@ -78,7 +78,13 @@ public class DfsMaster extends UnicastRemoteObject implements MasterServerInterf
 			return (id++) + "," + metaDataHash.get(fileName);
 		} else {
 			Random rand = new Random();
-			String primReplica = ips[Math.abs(rand.nextInt(ips.length - 1))];
+
+			String primReplica = "";
+			if (ips.length <= 1) {
+				primReplica = ips[0];
+			} else {
+				primReplica = ips[rand.nextInt(ips.length - 1)];
+			}
 			tempFiles.put(fileName, primReplica);
 			transactions.put(id, fileName);
 			log.write("File not found. Creating new file. Created new Transaction with id: "
@@ -110,20 +116,20 @@ public class DfsMaster extends UnicastRemoteObject implements MasterServerInterf
 			log.write("Transaction commited. New file " + fileName + " saved.");
 		}
 	}
-	
+
 	public static void main(String[] args) throws IOException {
 		Scanner fileReader = new Scanner(new File("conf/master_ip"));
 		String masterIp = fileReader.next();
 		fileReader.close();
 
 		System.out.println("Master Ip = " + masterIp);
-		
+
 		// RMI conf
 		System.setProperty("java.rmi.server.hostname", masterIp);
 		DfsMaster masterServr = new DfsMaster();
 		LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
 				Constants.RMI_NAME, masterServr);
-		
+
 		System.out.println("DfsMaster Registred to Registry Server...");
 	}
 
