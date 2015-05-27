@@ -51,7 +51,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 																// which locks
 																// transactions.
 
-	private PrimaryToMasterInterface masterServer;
+	private static PrimaryToMasterInterface masterServer;
 
 	private final ReadWriteLock transactionMapLocker = new ReentrantReadWriteLock();
 	private final ReadWriteLock mapFileToOwnerTransactionLocker = new ReentrantReadWriteLock();
@@ -77,17 +77,8 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	private final Lock fileUsed_writeLock = fileUsedLocker.writeLock();
 	private final Lock fileLock_writeLock = fileLockLocker.writeLock();
 
-	protected ReplicaServer(String currentIp) throws RemoteException {
+	protected ReplicaServer() throws RemoteException {
 		super();
-		try {
-			System.out.println("Replica Server Constructed.");
-
-			initiateMasterServerObject();
-			masterServer.initiateReplicaServerObject(currentIp);
-			System.out.println("***********************************");
-		} catch (FileNotFoundException | NotBoundException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void initiateMasterServerObject() throws FileNotFoundException,
@@ -102,7 +93,8 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		Registry registry = LocateRegistry.getRegistry(masterIp,
 				Constants.RMI_REGISTRY_PORT);
-		masterServer = (PrimaryToMasterInterface) registry.lookup(Constants.RMI_MASTER_NAME);
+		masterServer = (PrimaryToMasterInterface) registry
+				.lookup(Constants.RMI_MASTER_NAME);
 
 		System.out.println("PrimaryToMaster Interface Interface connected.");
 	}
@@ -286,12 +278,24 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		System.setProperty("java.rmi.server.hostname", currentReplicaIp);
 
 		// TODO(houssiany) use hdfs dir
-		ReplicaServer primaryReplicaServer = new ReplicaServer(currentReplicaIp);
+		ReplicaServer primaryReplicaServer = new ReplicaServer();
 		System.out.println("Primary Replica Server initiated.");
+
+		System.out.println("Replica Server Constructed.");
+
+		try {
+			primaryReplicaServer.initiateMasterServerObject();
+			masterServer.initiateReplicaServerObject(currentReplicaIp);
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("***********************************");
 		
 		Registry registry = LocateRegistry
 				.createRegistry(Constants.RMI_REGISTRY_PORT);
-		
+
 		System.out.println("Registry created.");
 		registry.rebind(Constants.RMI_REPLICA_NAME, primaryReplicaServer);
 
