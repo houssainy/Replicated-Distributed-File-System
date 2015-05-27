@@ -73,8 +73,8 @@ public class Client {
 	private static void writDataToRemoteFile(String filePath, Scanner in)
 			throws NotBoundException, FileNotFoundException, IOException, MessageNotFoundException {
 		String[] temp = dfsMaster.newTxn(filePath).split(",");
-		String replicaIp = temp[0];
-		long txnID = Long.parseLong(temp[1]);
+		long txnID = Long.parseLong(temp[0]);
+		String replicaIp = temp[1];
 
 		System.setProperty("java.rmi.server.hostname", replicaIp);
 
