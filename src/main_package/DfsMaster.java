@@ -76,6 +76,8 @@ public class DfsMaster extends UnicastRemoteObject implements
 		MasterToPrimaryInterface replicaServer = (MasterToPrimaryInterface) registry
 				.lookup(Constants.RMI_REPLICA_NAME);
 		replicaServers.put(replicaIp, replicaServer);
+		
+		System.out.println("Connected to RelicaServr using RMI interface.");
 	}
 
 	@Override

@@ -84,6 +84,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 			initiateMasterServerObject();
 			masterServer.initiateReplicaServerObject(currentIp);
+			System.out.println("***********************************");
 		} catch (FileNotFoundException | NotBoundException e) {
 			e.printStackTrace();
 		}
