@@ -100,6 +100,7 @@ public class Client {
 		String line;
 		System.out.println("Enter your message line by line and end it by END_FILE:");
 		while (!(line = in.nextLine()).equals("END_FILE")) {
+			System.out.println("Sending msg "+ line);
 			ack = replicaServer.write(txnID, msgSeqNum++, line);
 			System.out.println("Acknowlgdment Received " + ack);
 		}
