@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -80,7 +81,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		super();
 		try {
 			System.out.println("Replica Server Constructed.");
-			
+
 			initiateMasterServerObject();
 			masterServer.initiateReplicaServerObject(currentIp);
 		} catch (FileNotFoundException | NotBoundException e) {
@@ -100,14 +101,15 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		Registry registry = LocateRegistry.getRegistry(masterIp,
 				Constants.RMI_REGISTRY_PORT);
-		masterServer = (PrimaryToMasterInterface) registry
-				.lookup(Constants.RMI_MASTER_NAME);
-		
+		Remote x = registry.lookup(Constants.RMI_MASTER_NAME);
+		masterServer = (PrimaryToMasterInterface) x;
+
 		System.out.println("PrimaryToMaster Interface Interface connected.");
 	}
 
 	@Override
-	public void newTransaction(long txnID, String fileName) throws RemoteException{
+	public void newTransaction(long txnID, String fileName)
+			throws RemoteException {
 		transactionMap_writeLock.lock();
 		transactionMap.put(txnID, fileName);
 		transactionMap_writeLock.unlock();
@@ -282,7 +284,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		String currentReplicaIp = args[0];
 		System.out.println("Register RMI Registry on ip " + currentReplicaIp);
 		System.setProperty("java.rmi.server.hostname", currentReplicaIp);
-		System.out.println("-------------------------");
+
 		// TODO(houssiany) use hdfs dir
 		ReplicaServer primaryReplicaServer = new ReplicaServer(currentReplicaIp);
 		Registry registry = LocateRegistry
