@@ -51,7 +51,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 																// transactions.
 
 	private PrimaryToMasterInterface masterServer;
-	
+
 	private final ReadWriteLock transactionMapLocker = new ReentrantReadWriteLock();
 	private final ReadWriteLock mapFileToOwnerTransactionLocker = new ReentrantReadWriteLock();
 	private final ReadWriteLock writenFileDataLocker = new ReentrantReadWriteLock();
@@ -76,7 +76,6 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	private final Lock fileUsed_writeLock = fileUsedLocker.writeLock();
 	private final Lock fileLock_writeLock = fileLockLocker.writeLock();
 
-	
 	protected ReplicaServer(String currentIp) throws RemoteException {
 		super();
 		try {
@@ -87,17 +86,22 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		}
 	}
 
-	private void initiateMasterServerObject() throws FileNotFoundException, RemoteException, NotBoundException {
+	private void initiateMasterServerObject() throws FileNotFoundException,
+			RemoteException, NotBoundException {
 		Scanner fileReader = new Scanner(new File("conf/master_ip"));
 		String masterIp = fileReader.next();
 		fileReader.close();
-		
+
+		System.out.println("looking up for Master server with ip " + masterIp);
+
 		System.setProperty("java.rmi.server.hostname", masterIp);
 
 		Registry registry = LocateRegistry.getRegistry(masterIp,
 				Constants.RMI_REGISTRY_PORT);
 		masterServer = (PrimaryToMasterInterface) registry
 				.lookup(Constants.RMI_MASTER_NAME);
+		
+		System.out.println("PrimaryToMaster Interface Interface connected.");
 	}
 
 	@Override
@@ -280,7 +284,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		ReplicaServer primaryReplicaServer = new ReplicaServer(currentReplicaIp);
 		Registry registry = LocateRegistry
 				.createRegistry(Constants.RMI_REGISTRY_PORT);
-		
+
 		registry.rebind(Constants.RMI_REPLICA_NAME, primaryReplicaServer);
 
 		System.out.println("ReplicaServer Registred to Registry Server...");
