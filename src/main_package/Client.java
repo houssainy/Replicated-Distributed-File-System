@@ -91,6 +91,9 @@ public class Client {
 		
 		System.out.println("ReplicaServer Object initiated");
 		
+		// Enter pressed
+		in.nextLine();
+		
 		// TODO(houssainy) add commit and abort requests
 		int msgSeqNum = 0;
 		int ack;
