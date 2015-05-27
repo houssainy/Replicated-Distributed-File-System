@@ -82,7 +82,7 @@ public class Client {
 		Registry registry = LocateRegistry.getRegistry(replicaIp,
 				Constants.RMI_REGISTRY_PORT);
 
-		ReplicaServer replicaServer = (ReplicaServer) registry
+		ReplicaServerInterface replicaServer = (ReplicaServerInterface) registry
 				.lookup(Constants.RMI_NAME);
 
 		// TODO(houssainy) add commit and abort requests
