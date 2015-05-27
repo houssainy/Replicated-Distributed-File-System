@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.rmi.AccessException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,6 +50,8 @@ public class ReplicaServer extends UnicastRemoteObject implements
 																// which locks
 																// transactions.
 
+	private PrimaryToMasterInterface masterServer;
+	
 	private final ReadWriteLock transactionMapLocker = new ReentrantReadWriteLock();
 	private final ReadWriteLock mapFileToOwnerTransactionLocker = new ReentrantReadWriteLock();
 	private final ReadWriteLock writenFileDataLocker = new ReentrantReadWriteLock();
@@ -72,8 +76,27 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	private final Lock fileUsed_writeLock = fileUsedLocker.writeLock();
 	private final Lock fileLock_writeLock = fileLockLocker.writeLock();
 
+	
 	protected ReplicaServer() throws RemoteException {
 		super();
+		try {
+			initiateMasterServerObject();
+		} catch (FileNotFoundException | NotBoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void initiateMasterServerObject() throws FileNotFoundException, RemoteException, NotBoundException {
+		Scanner fileReader = new Scanner(new File("conf/master_ip"));
+		String masterIp = fileReader.next();
+		fileReader.close();
+		
+		System.setProperty("java.rmi.server.hostname", masterIp);
+
+		Registry registry = LocateRegistry.getRegistry(masterIp,
+				Constants.RMI_REGISTRY_PORT);
+		masterServer = (PrimaryToMasterInterface) registry
+				.lookup(Constants.RMI_MASTER_NAME);
 	}
 
 	@Override
@@ -113,7 +136,8 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		transactionMap_readLock.lock();
 		String fileName = transactionMap.get(txnID);
-		System.out.println("Writing on "+ fileName + " with transaction ID = "+ txnID);
+		System.out.println("Writing on " + fileName + " with transaction ID = "
+				+ txnID);
 		transactionMap_readLock.unlock();
 
 		// no transaction is writing now in this file
@@ -182,7 +206,8 @@ public class ReplicaServer extends UnicastRemoteObject implements
 			e.printStackTrace();
 		}
 
-		// TODO call commitTansaction to master
+		// call commitTansaction to master
+		masterServer.commitTansaction(txnID);
 		// TODO send other replicas to commit this transaction.
 		// "propagatedData", "fileName"
 		return ACK;
@@ -191,9 +216,8 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	@Override
 	public int abort(long txnID) throws RemoteException {
 		terminateTransaction(txnID);
-
-		// TODO call abortTansaction to master
-		// TODO roll back in this machine
+		// call abortTansaction to master
+		masterServer.abortTransaction(txnID);
 		// TODO send other replicas to roll back this transaction
 		return 0;
 	}
@@ -250,10 +274,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		}
 		System.setProperty("java.rmi.server.hostname", args[0]);
 
-		ReplicaServer masterServr = new ReplicaServer();
-
-		LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
-				Constants.RMI_REPLICA_NAME, masterServr);
+		ReplicaServer primaryReplicaServer = new ReplicaServer();
+		Registry registry = LocateRegistry
+				.createRegistry(Constants.RMI_REGISTRY_PORT);
+		
+		registry.rebind(Constants.RMI_REPLICA_NAME, primaryReplicaServer);
 
 		System.out.println("ReplicaServer Registred to Registry Server...");
 	}

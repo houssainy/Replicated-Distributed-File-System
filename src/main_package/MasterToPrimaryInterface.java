@@ -1,6 +1,8 @@
 package main_package;
 
-public interface MasterToPrimaryInterface {
+import java.rmi.Remote;
+
+public interface MasterToPrimaryInterface extends Remote{
 	
 	public void newTransaction(long txnID, String fileName);
 	

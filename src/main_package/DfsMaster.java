@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Random;
@@ -27,6 +29,7 @@ public class DfsMaster extends UnicastRemoteObject implements
 	private HashMap<String, String> metaDataHash;
 	private HashMap<Long, String> transactions;
 	private String[] ips;
+	private HashMap<String, MasterToPrimaryInterface> replicaServers;
 	private long id = 0;
 	private Log log;
 
@@ -55,6 +58,26 @@ public class DfsMaster extends UnicastRemoteObject implements
 		br.close();
 		System.out.println("Master Machine Started and Working.");
 		log.write("Master Machine Started and Working.");
+
+		try {
+			initiateReplicaServerObjects();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void initiateReplicaServerObjects() throws RemoteException,
+			NotBoundException {
+		replicaServers = new HashMap<String, MasterToPrimaryInterface>();
+		for (int i = 0; i < ips.length; i++) {
+			System.setProperty("java.rmi.server.hostname", ips[i]);
+
+			Registry registry = LocateRegistry.getRegistry(ips[i],
+					Constants.RMI_REGISTRY_PORT);
+			MasterToPrimaryInterface replicaServer = (MasterToPrimaryInterface) registry
+					.lookup(Constants.RMI_REPLICA_NAME);
+			replicaServers.put(ips[i], replicaServer);
+		}
 	}
 
 	@Override
@@ -75,6 +98,9 @@ public class DfsMaster extends UnicastRemoteObject implements
 			transactions.put(id, fileName);
 			log.write("Created new Transaction with id: " + id + "for file: "
 					+ fileName);
+			
+			String primaryServerIp = metaDataHash.get(fileName);
+			replicaServers.get(primaryServerIp).newTransaction(id, fileName);
 			return (id++) + "," + metaDataHash.get(fileName);
 		} else {
 			Random rand = new Random();
@@ -89,6 +115,9 @@ public class DfsMaster extends UnicastRemoteObject implements
 			transactions.put(id, fileName);
 			log.write("File not found. Creating new file. Created new Transaction with id: "
 					+ id + "for file: " + fileName);
+			
+			String primaryServerIp = metaDataHash.get(fileName);
+			replicaServers.get(primaryServerIp).newTransaction(id, fileName);
 			return (id++) + "," + tempFiles.get(fileName);
 		}
 	}
