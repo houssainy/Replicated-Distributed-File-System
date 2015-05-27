@@ -282,7 +282,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		String currentReplicaIp = args[0];
 		System.out.println("Register RMI Registry on ip " + currentReplicaIp);
 		System.setProperty("java.rmi.server.hostname", currentReplicaIp);
-
+		System.out.println("-------------------------");
 		// TODO(houssiany) use hdfs dir
 		ReplicaServer primaryReplicaServer = new ReplicaServer(currentReplicaIp);
 		Registry registry = LocateRegistry
