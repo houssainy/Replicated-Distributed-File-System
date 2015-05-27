@@ -11,6 +11,7 @@ import java.util.Scanner;
 
 import rmi_interface_package.MasterServerInterface;
 import rmi_interface_package.MessageNotFoundException;
+import rmi_interface_package.ReplicaServerInterface;
 
 public class Client {
 	private final static int READ = 1;
@@ -104,7 +105,7 @@ public class Client {
 
 		Registry registry = LocateRegistry.getRegistry(replicaIp,
 				Constants.RMI_REGISTRY_PORT);
-		ReplicaServer replicaServer = (ReplicaServer) registry
+		ReplicaServerInterface replicaServer = (ReplicaServerInterface) registry
 				.lookup(Constants.RMI_NAME);
 
 		System.out.println(replicaServer.read(filePath));
