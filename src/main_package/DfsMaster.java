@@ -68,6 +68,9 @@ public class DfsMaster extends UnicastRemoteObject implements
 
 	private void initiateReplicaServerObjects() throws RemoteException,
 			NotBoundException {
+		System.out.println("Initiating Replica Servers RMI interfaces.");
+		log.write("Initiating Replica Servers RMI interfaces.");
+		
 		replicaServers = new HashMap<String, MasterToPrimaryInterface>();
 		for (int i = 0; i < ips.length; i++) {
 			System.setProperty("java.rmi.server.hostname", ips[i]);
