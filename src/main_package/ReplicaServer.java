@@ -164,6 +164,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		String fileName = transactionMap.get(txnID);
 		transactionMap_readLock.unlock();
 
+		System.out.println("File name of txnId " + txnID + " is  " + fileName);
 		writtenFileData_readLock.lock();
 		String propagatedData = writtenFileData.get(fileName).toString();
 		writtenFileData_readLock.unlock();
@@ -242,9 +243,9 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 	public static void main(String[] args) throws AccessException,
 			RemoteException, FileNotFoundException {
-		if(args.length < 1){
+		if (args.length < 1) {
 			System.err.println("ERROR: Registry ip is missing...");
-			return; 
+			return;
 		}
 		System.setProperty("java.rmi.server.hostname", args[0]);
 
