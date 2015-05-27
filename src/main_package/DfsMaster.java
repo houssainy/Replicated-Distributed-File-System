@@ -128,7 +128,7 @@ public class DfsMaster extends UnicastRemoteObject implements
 		System.setProperty("java.rmi.server.hostname", masterIp);
 		DfsMaster masterServr = new DfsMaster();
 		LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
-				Constants.RMI_NAME, masterServr);
+				Constants.RMI_MASTER_NAME, masterServr);
 
 		System.out.println("DfsMaster Registred to Registry Server...");
 	}

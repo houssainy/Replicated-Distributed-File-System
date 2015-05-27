@@ -251,7 +251,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		ReplicaServer masterServr = new ReplicaServer();
 
 		LocateRegistry.createRegistry(Constants.RMI_REGISTRY_PORT).rebind(
-				Constants.RMI_NAME, masterServr);
+				Constants.RMI_MASTER_NAME, masterServr);
 
 		System.out.println("ReplicaServer Registred to Registry Server...");
 	}

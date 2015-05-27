@@ -68,7 +68,7 @@ public class Client {
 		Registry registry = LocateRegistry.getRegistry(masterIp,
 				Constants.RMI_REGISTRY_PORT);
 		System.out.println("Server Registered");
-		return (MasterServerInterface) registry.lookup(Constants.RMI_NAME);
+		return (MasterServerInterface) registry.lookup(Constants.RMI_MASTER_NAME);
 	}
 
 	private static void writDataToRemoteFile(String filePath, Scanner in)
@@ -87,7 +87,7 @@ public class Client {
 		System.out.println("Registered.");
 		
 		ReplicaServerInterface replicaServer = (ReplicaServerInterface) registry
-				.lookup(Constants.RMI_NAME);
+				.lookup(Constants.RMI_REPLICA_NAME);
 		
 		System.out.println("ReplicaServer Object initiated");
 		
@@ -98,6 +98,7 @@ public class Client {
 		int msgSeqNum = 0;
 		int ack;
 		String line;
+		System.out.println("Enter your message line by line and end it by ctrl-z:");
 		while ((line = in.nextLine()) != null) {
 			ack = replicaServer.write(txnID, msgSeqNum++, line);
 			System.out.println("Acknowlgdment Received " + ack);
@@ -115,7 +116,7 @@ public class Client {
 		Registry registry = LocateRegistry.getRegistry(replicaIp,
 				Constants.RMI_REGISTRY_PORT);
 		ReplicaServerInterface replicaServer = (ReplicaServerInterface) registry
-				.lookup(Constants.RMI_NAME);
+				.lookup(Constants.RMI_REPLICA_NAME);
 
 		System.out.println(replicaServer.read(filePath));
 	}
