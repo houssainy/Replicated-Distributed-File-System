@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -201,11 +202,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		// save data at this machine, flush, close
 		try {
-			PrintWriter pr = new PrintWriter(new File(dfsDir + fileName));
+			PrintWriter pr = new PrintWriter(new FileWriter(dfsDir + fileName, true));
 			pr.append(propagatedData);
 			pr.flush();
 			pr.close();
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
