@@ -242,11 +242,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 	public static void main(String[] args) throws AccessException,
 			RemoteException, FileNotFoundException {
-		Scanner fileReader = new Scanner(new File("conf/master_ip"));
-		String masterIp = fileReader.next();
-		fileReader.close();
-
-		System.setProperty("java.rmi.server.hostname", masterIp);
+		if(args.length < 1){
+			System.err.println("ERROR: Registry ip is missing...");
+			return; 
+		}
+		System.setProperty("java.rmi.server.hostname", args[0]);
 
 		ReplicaServer masterServr = new ReplicaServer();
 
