@@ -113,6 +113,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		transactionMap_readLock.lock();
 		String fileName = transactionMap.get(txnID);
+		System.out.println("Writing on "+ fileName + " with transaction ID = "+ txnID);
 		transactionMap_readLock.unlock();
 
 		// no transaction is writing now in this file
