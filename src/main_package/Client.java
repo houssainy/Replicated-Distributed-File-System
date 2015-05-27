@@ -99,7 +99,7 @@ public class Client {
 		int ack;
 		String line;
 		System.out.println("Enter your message line by line and end it by ctrl-z:");
-		while ((line = in.nextLine()) != "") {
+		while (!(line = in.nextLine()).isEmpty()) {
 			ack = replicaServer.write(txnID, msgSeqNum++, line);
 			System.out.println("Acknowlgdment Received " + ack);
 		}
