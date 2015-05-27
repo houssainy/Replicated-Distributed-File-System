@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -24,7 +26,6 @@ public class DfsMaster extends UnicastRemoteObject implements
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private BufferedReader metaData;
 	private HashMap<String, String> tempFiles;
 	private HashMap<String, String> metaDataHash;
 	private HashMap<Long, String> transactions;
@@ -36,7 +37,7 @@ public class DfsMaster extends UnicastRemoteObject implements
 	public DfsMaster() throws IOException {
 		super();
 
-		metaData = new BufferedReader(new FileReader("conf/MetaData"));
+		BufferedReader metaData = new BufferedReader(new FileReader("conf/MetaData"));
 		tempFiles = new HashMap<>();
 		metaDataHash = new HashMap<>();
 		transactions = new HashMap<>();
@@ -49,6 +50,7 @@ public class DfsMaster extends UnicastRemoteObject implements
 			String[] splittedLine = line.split(":");
 			metaDataHash.put(splittedLine[0], splittedLine[1]);
 		}
+		metaData.close();
 
 		System.out.println("Reading Replica Servers ips.");
 		BufferedReader br = new BufferedReader(new FileReader(
@@ -136,12 +138,17 @@ public class DfsMaster extends UnicastRemoteObject implements
 	}
 
 	@Override
-	public void commitTansaction(long txnID) {
+	public void commitTansaction(long txnID) throws IOException {
 		String fileName = transactions.get(txnID);
 		transactions.remove(txnID);
 
 		if (tempFiles.containsKey(fileName)) {
 			metaDataHash.put(fileName, tempFiles.get(fileName));
+			
+			PrintWriter out = new PrintWriter(new FileWriter("conf/MetaData", true));
+			out.append(fileName + ":" + tempFiles.get(fileName));
+			out.close();
+			
 			tempFiles.remove(fileName);
 			log.write("Transaction commited. New file " + fileName + " saved.");
 		}

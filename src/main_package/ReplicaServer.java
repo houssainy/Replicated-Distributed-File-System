@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.rmi.AccessException;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -211,7 +210,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		}
 
 		// call commitTansaction to master
-		masterServer.commitTansaction(txnID);
+		try {
+			masterServer.commitTansaction(txnID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		// TODO send other replicas to commit this transaction.
 		// "propagatedData", "fileName"
 		return ACK;
