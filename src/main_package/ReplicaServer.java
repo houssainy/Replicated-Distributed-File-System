@@ -77,10 +77,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	private final Lock fileLock_writeLock = fileLockLocker.writeLock();
 
 	
-	protected ReplicaServer() throws RemoteException {
+	protected ReplicaServer(String currentIp) throws RemoteException {
 		super();
 		try {
 			initiateMasterServerObject();
+			masterServer.initiateReplicaServerObject(currentIp);
 		} catch (FileNotFoundException | NotBoundException e) {
 			e.printStackTrace();
 		}
@@ -272,9 +273,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 			System.err.println("ERROR: Registry ip is missing...");
 			return;
 		}
-		System.setProperty("java.rmi.server.hostname", args[0]);
+		String currentReplicaIp = args[0];
+		System.setProperty("java.rmi.server.hostname", currentReplicaIp);
 
-		ReplicaServer primaryReplicaServer = new ReplicaServer();
+		// TODO(houssiany) use hdfs dir
+		ReplicaServer primaryReplicaServer = new ReplicaServer(currentReplicaIp);
 		Registry registry = LocateRegistry
 				.createRegistry(Constants.RMI_REGISTRY_PORT);
 		

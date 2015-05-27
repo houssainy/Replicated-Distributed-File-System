@@ -40,6 +40,8 @@ public class DfsMaster extends UnicastRemoteObject implements
 		tempFiles = new HashMap<>();
 		metaDataHash = new HashMap<>();
 		transactions = new HashMap<>();
+		replicaServers = new HashMap<>();
+
 		log = Log.createInstance();
 
 		String line;
@@ -58,29 +60,22 @@ public class DfsMaster extends UnicastRemoteObject implements
 		br.close();
 		System.out.println("Master Machine Started and Working.");
 		log.write("Master Machine Started and Working.");
-
-		try {
-			initiateReplicaServerObjects();
-		} catch (NotBoundException e) {
-			e.printStackTrace();
-		}
 	}
 
-	private void initiateReplicaServerObjects() throws RemoteException,
-			NotBoundException {
-		System.out.println("Initiating Replica Servers RMI interfaces.");
-		log.write("Initiating Replica Servers RMI interfaces.");
-		
-		replicaServers = new HashMap<String, MasterToPrimaryInterface>();
-		for (int i = 0; i < ips.length; i++) {
-			System.setProperty("java.rmi.server.hostname", ips[i]);
+	@Override
+	public void initiateReplicaServerObject(String replicaIp)
+			throws RemoteException, NotBoundException {
+		System.out.println("Initiating Replica Server RMI interfaces with ip "
+				+ replicaIp);
+		log.write("Initiating Replica Server RMI interfaces with ip "
+				+ replicaIp);
 
-			Registry registry = LocateRegistry.getRegistry(ips[i],
-					Constants.RMI_REGISTRY_PORT);
-			MasterToPrimaryInterface replicaServer = (MasterToPrimaryInterface) registry
-					.lookup(Constants.RMI_REPLICA_NAME);
-			replicaServers.put(ips[i], replicaServer);
-		}
+		System.setProperty("java.rmi.server.hostname", replicaIp);
+		Registry registry = LocateRegistry.getRegistry(replicaIp,
+				Constants.RMI_REGISTRY_PORT);
+		MasterToPrimaryInterface replicaServer = (MasterToPrimaryInterface) registry
+				.lookup(Constants.RMI_REPLICA_NAME);
+		replicaServers.put(replicaIp, replicaServer);
 	}
 
 	@Override
@@ -101,7 +96,7 @@ public class DfsMaster extends UnicastRemoteObject implements
 			transactions.put(id, fileName);
 			log.write("Created new Transaction with id: " + id + "for file: "
 					+ fileName);
-			
+
 			String primaryServerIp = metaDataHash.get(fileName);
 			replicaServers.get(primaryServerIp).newTransaction(id, fileName);
 			return (id++) + "," + metaDataHash.get(fileName);
@@ -118,7 +113,7 @@ public class DfsMaster extends UnicastRemoteObject implements
 			transactions.put(id, fileName);
 			log.write("File not found. Creating new file. Created new Transaction with id: "
 					+ id + "for file: " + fileName);
-			
+
 			String primaryServerIp = metaDataHash.get(fileName);
 			replicaServers.get(primaryServerIp).newTransaction(id, fileName);
 			return (id++) + "," + tempFiles.get(fileName);
