@@ -75,6 +75,7 @@ public class DfsMaster extends UnicastRemoteObject implements
 				Constants.RMI_REGISTRY_PORT);
 		MasterToPrimaryInterface replicaServer = (MasterToPrimaryInterface) registry
 				.lookup(Constants.RMI_REPLICA_NAME);
+		
 		replicaServers.put(replicaIp, replicaServer);
 		
 		System.out.println("Connected to RelicaServr using RMI interface.");
@@ -116,7 +117,7 @@ public class DfsMaster extends UnicastRemoteObject implements
 			log.write("File not found. Creating new file. Created new Transaction with id: "
 					+ id + "for file: " + fileName);
 
-			String primaryServerIp = metaDataHash.get(fileName);
+			String primaryServerIp = tempFiles.get(fileName);
 			replicaServers.get(primaryServerIp).newTransaction(id, fileName);
 			return (id++) + "," + tempFiles.get(fileName);
 		}
