@@ -100,7 +100,7 @@ public class Client {
 		String line;
 		System.out.println("Enter your message line by line and end it by ctrl-z:");
 		while ((line = in.nextLine()) != null) {
-			ack = replicaServer.write(txnID, msgSeqNum++, in.nextLine());
+			ack = replicaServer.write(txnID, msgSeqNum++, line);
 			System.out.println("Acknowlgdment Received " + ack);
 		}
 		replicaServer.commit(txnID, msgSeqNum);
