@@ -286,9 +286,12 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		// TODO(houssiany) use hdfs dir
 		ReplicaServer primaryReplicaServer = new ReplicaServer(currentReplicaIp);
+		System.out.println("Primary Replica Server initiated.");
+		
 		Registry registry = LocateRegistry
 				.createRegistry(Constants.RMI_REGISTRY_PORT);
-
+		
+		System.out.println("Registry created.");
 		registry.rebind(Constants.RMI_REPLICA_NAME, primaryReplicaServer);
 
 		System.out.println("ReplicaServer Registred to Registry Server...");
