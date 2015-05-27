@@ -101,8 +101,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		Registry registry = LocateRegistry.getRegistry(masterIp,
 				Constants.RMI_REGISTRY_PORT);
-		Remote x = registry.lookup(Constants.RMI_MASTER_NAME);
-		masterServer = (PrimaryToMasterInterface) x;
+		masterServer = (PrimaryToMasterInterface) registry.lookup(Constants.RMI_MASTER_NAME);
 
 		System.out.println("PrimaryToMaster Interface Interface connected.");
 	}
