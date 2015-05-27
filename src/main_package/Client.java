@@ -76,7 +76,9 @@ public class Client {
 		String[] temp = dfsMaster.newTxn(filePath).split(",");
 		long txnID = Long.parseLong(temp[0]);
 		String replicaIp = temp[1];
-
+		
+		System.out.println("Replica ip "+ replicaIp);
+		
 		System.setProperty("java.rmi.server.hostname", replicaIp);
 
 		Registry registry = LocateRegistry.getRegistry(replicaIp,
