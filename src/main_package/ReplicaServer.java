@@ -107,7 +107,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	}
 
 	@Override
-	public void newTransaction(long txnID, String fileName) {
+	public void newTransaction(long txnID, String fileName) throws RemoteException{
 		transactionMap_writeLock.lock();
 		transactionMap.put(txnID, fileName);
 		transactionMap_writeLock.unlock();
