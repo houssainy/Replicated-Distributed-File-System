@@ -234,8 +234,10 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		String fileName = transactionMap.get(txnID);
 		transactionMap_readLock.unlock();
 
+		fileLock_readLock.lock();
 		fileLock.get(fileName).unlock();
-
+		fileLock_readLock.unlock();
+		
 		fileLock_readLock.lock();
 		boolean x = fileLock.get(fileName).tryLock();
 		if (!x)
