@@ -158,20 +158,31 @@ public class ReplicaServer extends UnicastRemoteObject implements
 			y = mapFileToOwnerTransaction.get(fileName) != txnID;
 		mapFileToOwnerTransaction_readLock.unlock();
 
+		if(!x) {
+			System.out.println("lock: "+fileLock.get(fileName) + " write will aquire for the first time on this file");
+			fileLock_readLock.lock();
+			try {
+				fileLock.get(fileName).acquire();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			fileLock_readLock.unlock();
+			System.out.println("lock: "+fileLock.get(fileName) + " write lock aquired");
+		} else if(y) {
+			System.out.println("lock: "+fileLock.get(fileName) + " write will aquire lock will block");
+			fileLock_readLock.lock();
+			try {
+				fileLock.get(fileName).acquire();
+				fileLock.get(fileName).acquire();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			fileLock_readLock.unlock();
+			System.out.println("lock: "+fileLock.get(fileName) + " write waked up.");
+		}
+		
+		
 		if (!x || y) {
-			// get access to this file
-//			synchronized (fileLock) {
-				System.out.println("lock: "+fileLock.get(fileName) + " write lock");
-				fileLock_readLock.lock();
-				try {
-					fileLock.get(fileName).acquire();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				fileLock_readLock.unlock();
-				System.out.println("lock: "+fileLock.get(fileName) + " write unlock");
-//			}
-
 			fileUsed_writeLock.lock();
 			fileUsed.add(fileName);
 			fileUsed_writeLock.unlock();
