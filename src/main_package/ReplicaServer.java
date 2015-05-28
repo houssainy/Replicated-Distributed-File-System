@@ -157,11 +157,9 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		if (!x || y) {
 			// get access to this file
-			fileLock_readLock.lock();
-			Lock lock = fileLock.get(fileName);
-			fileLock_readLock.unlock();
-
-			lock.lock();
+			synchronized (fileName) {
+				fileLock.get(fileName).lock();
+			}
 
 			fileUsed_writeLock.lock();
 			fileUsed.add(fileName);
@@ -229,16 +227,14 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		return 0;
 	}
 
-	public synchronized void terminateTransaction(long txnID) {
+	public void terminateTransaction(long txnID) {
 		transactionMap_readLock.lock();
 		String fileName = transactionMap.get(txnID);
 		transactionMap_readLock.unlock();
 
-		fileLock_readLock.lock();
-		Lock lock = fileLock.get(fileName);
-		fileLock_readLock.unlock();
-		
-		lock.unlock();
+		synchronized (fileLock) {
+			fileLock.get(fileName).unlock();
+		}
 		
 		fileLock_readLock.lock();
 		boolean x = fileLock.get(fileName).tryLock();
