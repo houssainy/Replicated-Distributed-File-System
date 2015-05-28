@@ -80,6 +80,9 @@ public class DfsMaster extends UnicastRemoteObject implements
 		
 		replicaServers.put(replicaIp, replicaServer);
 		
+		for (String ip : ips)
+			replicaServers.get(ip).newReplicaServer(replicaIp);
+		
 		System.out.println("Connected to RelicaServr using RMI interface.");
 	}
 

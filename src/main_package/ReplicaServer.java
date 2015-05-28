@@ -45,12 +45,14 @@ public class ReplicaServer extends UnicastRemoteObject implements
 														// is used by any write
 														// transaction
 	private HashMap<String, Semaphore> fileLock = new HashMap<>(); // Key:fileName,
-																// Value:the
-																// lock
-																// specified for
-																// this file
-																// which locks
-																// transactions.
+																	// Value:the
+																	// lock
+																	// specified
+																	// for
+																	// this file
+																	// which
+																	// locks
+																	// transactions.
 
 	private static PrimaryToMasterInterface masterServer;
 
@@ -78,8 +80,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	private final Lock fileUsed_writeLock = fileUsedLocker.writeLock();
 	private final Lock fileLock_writeLock = fileLockLocker.writeLock();
 
+	private HashMap<String, ReplicaToReplicaInterface> replicaServers;
+
 	protected ReplicaServer() throws RemoteException {
 		super();
+		replicaServers = new HashMap<String, ReplicaToReplicaInterface>();
 	}
 
 	private void initiateMasterServerObject() throws FileNotFoundException,
@@ -154,23 +159,25 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		mapFileToOwnerTransaction_readLock.lock();
 		boolean y = false;
-		if(mapFileToOwnerTransaction.containsKey(fileName))
+		if (mapFileToOwnerTransaction.containsKey(fileName))
 			y = mapFileToOwnerTransaction.get(fileName) != txnID;
 		mapFileToOwnerTransaction_readLock.unlock();
 
 		if (!x || y) {
 			// get access to this file
-//			synchronized (fileLock) {
-				System.out.println("lock: "+fileLock.get(fileName) + " write lock");
-				fileLock_readLock.lock();
-				try {
-					fileLock.get(fileName).acquire();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				fileLock_readLock.unlock();
-				System.out.println("lock: "+fileLock.get(fileName) + " write unlock");
-//			}
+			// synchronized (fileLock) {
+			System.out.println("lock: " + fileLock.get(fileName)
+					+ " write lock");
+			fileLock_readLock.lock();
+			try {
+				fileLock.get(fileName).acquire();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			fileLock_readLock.unlock();
+			System.out.println("lock: " + fileLock.get(fileName)
+					+ " write unlock");
+			// }
 
 			fileUsed_writeLock.lock();
 			fileUsed.add(fileName);
@@ -210,7 +217,8 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		// save data at this machine, flush, close
 		try {
-			PrintWriter pr = new PrintWriter(new FileWriter(dfsDir + fileName, true));
+			PrintWriter pr = new PrintWriter(new FileWriter(dfsDir + fileName,
+					true));
 			pr.append(propagatedData);
 			pr.flush();
 			pr.close();
@@ -225,6 +233,13 @@ public class ReplicaServer extends UnicastRemoteObject implements
 			e.printStackTrace();
 		}
 		// TODO send other replicas to commit this transaction.
+		for (String replicaIp : replicaServers.keySet()) {
+			try {
+				replicaServers.get(replicaIp).propagateData(fileName, propagatedData);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		// "propagatedData", "fileName"
 		return ACK;
 	}
@@ -243,14 +258,16 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		String fileName = transactionMap.get(txnID);
 		transactionMap_readLock.unlock();
 
-//		synchronized (fileLock) {
-			System.out.println("lock: "+fileLock.get(fileName) + " commit will unlock");
-			fileLock_readLock.lock();
-			fileLock.get(fileName).release();
-			fileLock_readLock.unlock();
-			System.out.println("lock: "+fileLock.get(fileName) + " commit unlocked");
-//		}
-		
+		// synchronized (fileLock) {
+		System.out.println("lock: " + fileLock.get(fileName)
+				+ " commit will unlock");
+		fileLock_readLock.lock();
+		fileLock.get(fileName).release();
+		fileLock_readLock.unlock();
+		System.out.println("lock: " + fileLock.get(fileName)
+				+ " commit unlocked");
+		// }
+
 		fileLock_readLock.lock();
 		boolean x = fileLock.get(fileName).tryAcquire();
 		if (!x)
@@ -301,22 +318,43 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		// TODO(houssiany) use hdfs dir
 		ReplicaServer primaryReplicaServer = new ReplicaServer();
 		System.out.println("Primary Replica Server initiated.");
-		
+
 		Registry registry = LocateRegistry
 				.createRegistry(Constants.RMI_REGISTRY_PORT);
 
 		System.out.println("Registry created.");
 		registry.rebind(Constants.RMI_REPLICA_NAME, primaryReplicaServer);
-		
+
 		System.out.println("ReplicaServer Registred to Registry Server...");
-	
+
 		try {
 			primaryReplicaServer.initiateMasterServerObject();
 			masterServer.initiateReplicaServerObject(currentReplicaIp);
 		} catch (NotBoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		System.out.println("***********************************");
+	}
+
+	@Override
+	public void newReplicaServer(String replicaIp) throws RemoteException {
+		System.out
+				.println("looking up for Replica server with ip " + replicaIp);
+
+		System.setProperty("java.rmi.server.hostname", replicaIp);
+
+		Registry registry = LocateRegistry.getRegistry(replicaIp,
+				Constants.RMI_REGISTRY_PORT);
+		try {
+			ReplicaToReplicaInterface rtr = (ReplicaToReplicaInterface) registry
+					.lookup(Constants.RMI_REPLICA_NAME);
+			
+			replicaServers.put(replicaIp, rtr);
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("PrimaryToMaster Interface Interface connected.");
 	}
 }
