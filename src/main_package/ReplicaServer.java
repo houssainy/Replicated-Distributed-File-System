@@ -229,7 +229,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		return 0;
 	}
 
-	public void terminateTransaction(long txnID) {
+	public synchronized void terminateTransaction(long txnID) {
 		transactionMap_readLock.lock();
 		String fileName = transactionMap.get(txnID);
 		transactionMap_readLock.unlock();
