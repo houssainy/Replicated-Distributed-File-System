@@ -105,9 +105,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		transactionMap_writeLock.lock();
 		transactionMap.put(txnID, fileName);
 		transactionMap_writeLock.unlock();
+		fileLock_writeLock.lock();
 		if (!fileLock.containsKey(fileName)) { // new file to the system
 			fileLock.put(fileName, new ReentrantReadWriteLock().writeLock());
 		}
+		fileLock_writeLock.unlock();
 	}
 
 	@Override
@@ -157,11 +159,13 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		if (!x || y) {
 			// get access to this file
-			synchronized (fileLock) {
+//			synchronized (fileLock) {
 				System.out.println("lock: "+fileLock.get(fileName) + " write lock");
+				fileLock_readLock.lock();
 				fileLock.get(fileName).lock();
+				fileLock_readLock.unlock();
 				System.out.println("lock: "+fileLock.get(fileName) + " write unlock");
-			}
+//			}
 
 			fileUsed_writeLock.lock();
 			fileUsed.add(fileName);
@@ -234,11 +238,13 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		String fileName = transactionMap.get(txnID);
 		transactionMap_readLock.unlock();
 
-		synchronized (fileLock) {
-			System.out.println("lock: "+fileLock.get(fileName) + " write will unlock");
+//		synchronized (fileLock) {
+			System.out.println("lock: "+fileLock.get(fileName) + " commit will unlock");
+			fileLock_readLock.lock();
 			fileLock.get(fileName).unlock();
-			System.out.println("lock: "+fileLock.get(fileName) + " write unlocked");
-		}
+			fileLock_readLock.unlock();
+			System.out.println("lock: "+fileLock.get(fileName) + " commit unlocked");
+//		}
 		
 		fileLock_readLock.lock();
 		boolean x = fileLock.get(fileName).tryLock();
