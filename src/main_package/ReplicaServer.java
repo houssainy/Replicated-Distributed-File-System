@@ -17,6 +17,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -43,7 +44,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 	private HashSet<String> fileUsed = new HashSet<>(); // Key:fileName, if it
 														// is used by any write
 														// transaction
-	private HashMap<String, Lock> fileLock = new HashMap<>(); // Key:fileName,
+	private HashMap<String, Semaphore> fileLock = new HashMap<>(); // Key:fileName,
 																// Value:the
 																// lock
 																// specified for
@@ -107,7 +108,7 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		transactionMap_writeLock.unlock();
 		fileLock_writeLock.lock();
 		if (!fileLock.containsKey(fileName)) { // new file to the system
-			fileLock.put(fileName, new ReentrantReadWriteLock().writeLock());
+			fileLock.put(fileName, new Semaphore(1, true));
 		}
 		fileLock_writeLock.unlock();
 	}
@@ -162,7 +163,11 @@ public class ReplicaServer extends UnicastRemoteObject implements
 //			synchronized (fileLock) {
 				System.out.println("lock: "+fileLock.get(fileName) + " write lock");
 				fileLock_readLock.lock();
-				fileLock.get(fileName).lock();
+				try {
+					fileLock.get(fileName).acquire();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 				fileLock_readLock.unlock();
 				System.out.println("lock: "+fileLock.get(fileName) + " write unlock");
 //			}
@@ -241,15 +246,15 @@ public class ReplicaServer extends UnicastRemoteObject implements
 //		synchronized (fileLock) {
 			System.out.println("lock: "+fileLock.get(fileName) + " commit will unlock");
 			fileLock_readLock.lock();
-			fileLock.get(fileName).unlock();
+			fileLock.get(fileName).release();
 			fileLock_readLock.unlock();
 			System.out.println("lock: "+fileLock.get(fileName) + " commit unlocked");
 //		}
 		
 		fileLock_readLock.lock();
-		boolean x = fileLock.get(fileName).tryLock();
+		boolean x = fileLock.get(fileName).tryAcquire();
 		if (!x)
-			fileLock.get(fileName).unlock();
+			fileLock.get(fileName).release();
 		fileLock_readLock.unlock();
 
 		if (x) { // check if no more transactions are requesting write on this
