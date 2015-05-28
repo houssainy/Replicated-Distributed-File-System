@@ -235,8 +235,10 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		transactionMap_readLock.unlock();
 
 		fileLock_readLock.lock();
-		fileLock.get(fileName).unlock();
+		Lock lock = fileLock.get(fileName);
 		fileLock_readLock.unlock();
+		
+		lock.unlock();
 		
 		fileLock_readLock.lock();
 		boolean x = fileLock.get(fileName).tryLock();
