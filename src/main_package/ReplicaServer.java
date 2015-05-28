@@ -157,8 +157,10 @@ public class ReplicaServer extends UnicastRemoteObject implements
 
 		if (!x || y) {
 			// get access to this file
-			synchronized (fileName) {
+			synchronized (fileLock) {
+				System.out.println("lock: "+fileLock.get(fileName) + " write lock");
 				fileLock.get(fileName).lock();
+				System.out.println("lock: "+fileLock.get(fileName) + " write unlock");
 			}
 
 			fileUsed_writeLock.lock();
@@ -233,7 +235,9 @@ public class ReplicaServer extends UnicastRemoteObject implements
 		transactionMap_readLock.unlock();
 
 		synchronized (fileLock) {
+			System.out.println("lock: "+fileLock.get(fileName) + " write will unlock");
 			fileLock.get(fileName).unlock();
+			System.out.println("lock: "+fileLock.get(fileName) + " write unlocked");
 		}
 		
 		fileLock_readLock.lock();
@@ -299,7 +303,6 @@ public class ReplicaServer extends UnicastRemoteObject implements
 			primaryReplicaServer.initiateMasterServerObject();
 			masterServer.initiateReplicaServerObject(currentReplicaIp);
 		} catch (NotBoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
